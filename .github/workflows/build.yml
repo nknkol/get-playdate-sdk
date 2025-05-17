@@ -10,7 +10,7 @@ on:
       src-dir:
         description: '源码目录（相对于仓库根目录）'
         required: false
-        default: 'myProjectName'
+        default: 'myProjectName/source'
       out-dir:
         description: '输出目录'
         required: false
