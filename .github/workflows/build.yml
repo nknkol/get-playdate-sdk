@@ -26,7 +26,7 @@ jobs:
 
       - name: 安装 Playdate SDK（本地 action）
         # 直接引用根目录下的 action.yml
-        uses: ./github/get_playdatesdk/  
+        uses: ./.github/actions/get-playdate-sdk  
         with:
           version: ${{ github.event.inputs.sdk-version }}
 
