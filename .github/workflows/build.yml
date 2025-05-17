@@ -1,0 +1,43 @@
+name: 手动编译 Playdate 游戏
+
+on:
+  workflow_dispatch:
+    inputs:
+      sdk-version:
+        description: 'Playdate SDK 版本'
+        required: false
+        default: 'latest'
+      src-dir:
+        description: '源码目录（相对于仓库根目录）'
+        required: false
+        default: 'myProjectName'
+      out-dir:
+        description: '输出目录'
+        required: false
+        default: 'build'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v3
+
+      - name: 安装 Playdate SDK
+        uses: pd-rs/get-playdate-sdk@v0.4
+        with:
+          version: ${{ github.event.inputs.sdk-version }}
+
+      - name: 编译游戏
+        run: |
+          mkdir -p "${{ github.event.inputs.out-dir }}"
+          pdc -d "$PLAYDATE_SDK_PATH" \
+              -o "${{ github.event.inputs.out-dir }}/game.pdx" \
+              "${{ github.event.inputs.src-dir }}"
+
+      - name: 上传编译产物
+        uses: actions/upload-artifact@v3
+        with:
+          name: playdate-game
+          path: "${{ github.event.inputs.out-dir }}/*.pdx"
