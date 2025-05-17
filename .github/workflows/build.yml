@@ -21,21 +21,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 拉取仓库
+      - name: 拉取仓库代码
         uses: actions/checkout@v3
 
       - name: 安装 Playdate SDK（本地 action）
-        # 直接引用根目录下的 action.yml
-        uses: ./.github/get-playdate-sdk  
+        uses: ./.github/get-playdate-sdk
         with:
           version: ${{ github.event.inputs.sdk-version }}
 
       - name: 编译游戏
         run: |
           mkdir -p "${{ github.event.inputs.out-dir }}"
-          pdc -d "$PLAYDATE_SDK_PATH" \
-              -o "${{ github.event.inputs.out-dir }}/game.pdx" \
-              "${{ github.event.inputs.src-dir }}"
+          pdc -sdkpath "$PLAYDATE_SDK_PATH" \
+              "${{ github.event.inputs.src-dir }}" \
+              "${{ github.event.inputs.out-dir }}/game.pdx"
 
       - name: 上传编译产物
         uses: actions/upload-artifact@v4
