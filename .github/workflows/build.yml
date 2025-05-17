@@ -38,7 +38,7 @@ jobs:
               "${{ github.event.inputs.src-dir }}"
 
       - name: 上传编译产物
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: playdate-game
           path: "${{ github.event.inputs.out-dir }}/*.pdx"
