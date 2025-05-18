@@ -1,7 +1,42 @@
-// .vscode/settings.json (修正后)
+// .vscode/settings.json (合并并修正后)
 {
-  "playdate-debug.sdkPath": "/Users/nknkol/Developer/PlaydateSDK", // 这个路径通常是正确的，指向SDK安装位置
-  "playdate-debug.sourcePath": "myProjectName/Source",       // 相对于工作区根目录的源文件路径
-  "playdate-debug.outputPath": "output",                     // 相对于工作区根目录的输出目录路径
-  "playdate-debug.productName": "myProjectName"              // 你的游戏名
+  // --- playdate-debug 扩展的配置 ---
+  "playdate-debug.sdkPath": "/Users/nknkol/Developer/PlaydateSDK",
+  "playdate-debug.sourcePath": "myProjectName/Source", // 假设您的项目结构中，工作区根目录直接包含 myProjectName
+  "playdate-debug.outputPath": "output",
+  "playdate-debug.productName": "myProjectName",
+
+  // --- lua-language-server (sumneko/vscode-lua) 扩展的配置 ---
+  "Lua.runtime.version": "Lua 5.4", // Playdate 使用 Lua 5.4
+
+  "Lua.diagnostics.globals": [
+    "playdate",
+    "import"
+  ],
+
+  "Lua.workspace.library": [
+    // 1. Playdate SDK 的 CoreLibs 路径
+    //    您需要将 playdate-debug.sdkPath 的值与 "/CrankSDK/CoreLibs" (或实际的CoreLibs子路径) 结合起来
+    //    例如: "/Users/nknkol/Developer/PlaydateSDK/CrankSDK/CoreLibs"
+    //    (请确认您 SDK 中 CoreLibs 的确切子路径，通常在 SDK 根目录下的某个子文件夹里)
+    //    我们先假设一个常见的路径结构，您需要根据实际情况调整：
+    "/Users/nknkol/Developer/PlaydateSDK/CoreLibs", // <--- ***您需要确认这个路径是否准确***
+                                                      // 更有可能是 "/Users/nknkol/Developer/PlaydateSDK/CrankSDK/CoreLibs"
+                                                      // 或者 SDK 直接解压后就是 PlaydateSDK/CoreLibs
+
+    // 2. (可选但推荐) Playdate 全局 API 定义文件所在的目录路径
+    //    这些文件通常由社区提供或包含在类似 playdate-debug 的扩展中。
+    //    如果您有单独的API定义文件夹，请取消注释并修改路径。
+    // "/path/to/your/playdate-api-definitions"
+  ],
+  "luau-lsp.sourcemap.enabled": false,
+  "luau-lsp.sourcemap.autogenerate": false // 通常也建议禁用自动生成
+  // (可选) 改善类型推断和对第三方库的支持
+  // "Lua.type.infernum.mode": "Strict", // 可以尝试更严格的类型推断
+
+  // (可选) 其他 lua-language-server 配置
+  // "Lua.completion.callSnippet": "Replace",
+  // "Lua.format.enable": true, // 如果您使用 stylua 或其他格式化工具
+  // "Lua.format.defaultConfig.indent_style": "space",
+  // "Lua.format.defaultConfig.indent_size": "2",
 }
