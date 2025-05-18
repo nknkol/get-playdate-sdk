@@ -188,7 +188,6 @@ function playdate.AButtonUp()
     end
     longPressOccurred = false -- 重置以备下次使用
 end
-
 -- Handle the B button for canceling or deleting characters
 function playdate.BButtonDown()
 	if cursorPos > 0 then
