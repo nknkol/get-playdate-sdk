@@ -1,0 +1,50 @@
+// {
+//   "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
+//   "diagnostics.globals": ["import","playdate"],
+//   "format.enable": true,
+//   "format.defaultConfig": {
+//     "indent_style": "space",
+//     "indent_size": "4"
+//   },
+//   "runtime.builtin": { "io": "disable", "os": "disable", "package": "disable" },
+//   "runtime.nonstandardSymbol": ["+=", "-=", "*=", "/=", "//=", "%=", "<<=", ">>=", "&=", "|=", "^="],
+//   "runtime.version": "Lua 5.4",
+//   "workspace.preloadFileSize": 1000,
+//   "workspace.library": ["./library/playdate-luacats"],
+//   "diagnostics.disable": ["duplicate-set-field"]
+// }
+// myProjectName/.luarc.json
+{
+  "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
+  "diagnostics.globals": [
+    "import",
+    "playdate" // 也建议在这里声明 playdate 为全局，确保 LSP 知道
+  ],
+  "diagnostics.severity": {
+    "duplicate-set-field": "Hint" // 将 playdate.update 等回调的“重复定义”降为提示
+  },
+  "format.defaultConfig": { // 这是可选的格式化配置，您可以根据喜好保留或移除
+    "indent_style": "space",
+    "indent_size": "4"     // Playdate SDK 示例代码常用 2 个空格或 Tab
+  },
+  "runtime.builtin": { // 禁用一些标准 Lua 库，因为 Playdate 环境可能不提供或行为不同
+    "io": "disable",
+    "os": "disable",
+    "package": "disable"
+  },
+  "runtime.nonstandardSymbol": [ // 允许 Playdate 的复合赋值操作符
+    "+=", "-=", "*=", "/=", "//=", "%=", "<<=", ">>=", "&=", "|=", "^="
+  ],
+  "runtime.version": "Lua 5.4",
+  "workspace.preloadFileSize": 1000,
+  "workspace.library": [
+    // 替换为 playdate-luacats 在您电脑上的实际路径
+    "/Users/nknkol/Documents/开发/get-playdate-sdk/library/playdate-luacats", // 这是您之前错误信息中显示的路径
+                                                                        // 请确认这个路径是 playdate-luacats 项目的根目录
+    // 您 Playdate SDK 中的 CoreLibs 路径也应该在这里添加
+    // 请务必确认 CoreLibs 的准确路径!
+    // 例如: "/Users/nknkol/Developer/PlaydateSDK/CrankSDK/CoreLibs"
+    // 或: "/Users/nknkol/Developer/PlaydateSDK/CoreLibs"
+    "/Users/nknkol/Developer/PlaydateSDK/CrankSDK/CoreLibs" // <--- 示例，请务必核实并修改
+  ]
+}

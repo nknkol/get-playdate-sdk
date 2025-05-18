@@ -1,42 +1,79 @@
-// .vscode/settings.json (合并并修正后)
+// // .vscode/settings.json (合并并修正后)
+// {
+//   // --- playdate-debug 扩展的配置 ---
+//   "playdate-debug.sdkPath": "/Users/nknkol/Developer/PlaydateSDK",
+//   "playdate-debug.sourcePath": "myProjectName/Source", // 假设您的项目结构中，工作区根目录直接包含 myProjectName
+//   "playdate-debug.outputPath": "output",
+//   "playdate-debug.productName": "myProjectName",
+
+//   // --- lua-language-server (sumneko/vscode-lua) 扩展的配置 ---
+//   "Lua.runtime.version": "Lua 5.4", // Playdate 使用 Lua 5.4
+
+//   // "Lua.diagnostics.globals": [
+//   //   "playdate",
+//   //   "import"
+//   // ],
+
+//   // "Lua.workspace.library": [
+//   //   // 1. Playdate SDK 的 CoreLibs 路径
+//   //   //    您需要将 playdate-debug.sdkPath 的值与 "/CrankSDK/CoreLibs" (或实际的CoreLibs子路径) 结合起来
+//   //   //    例如: "/Users/nknkol/Developer/PlaydateSDK/CrankSDK/CoreLibs"
+//   //   //    (请确认您 SDK 中 CoreLibs 的确切子路径，通常在 SDK 根目录下的某个子文件夹里)
+//   //   //    我们先假设一个常见的路径结构，您需要根据实际情况调整：
+//   //   "/Users/nknkol/Developer/PlaydateSDK/CoreLibs", // <--- ***您需要确认这个路径是否准确***
+//   //                                                     // 更有可能是 "/Users/nknkol/Developer/PlaydateSDK/CrankSDK/CoreLibs"
+//   //                                                     // 或者 SDK 直接解压后就是 PlaydateSDK/CoreLibs
+
+//   //   // 2. (可选但推荐) Playdate 全局 API 定义文件所在的目录路径
+//   //   //    这些文件通常由社区提供或包含在类似 playdate-debug 的扩展中。
+//   //   //    如果您有单独的API定义文件夹，请取消注释并修改路径。
+//   //   // "/path/to/your/playdate-api-definitions"
+//   // ],
+//   "luau-lsp.sourcemap.enabled": false,
+//   "luau-lsp.sourcemap.autogenerate": false // 通常也建议禁用自动生成
+//   // (可选) 改善类型推断和对第三方库的支持
+//   // "Lua.type.infernum.mode": "Strict", // 可以尝试更严格的类型推断
+
+//   // (可选) 其他 lua-language-server 配置
+//   // "Lua.completion.callSnippet": "Replace",
+//   // "Lua.format.enable": true, // 如果您使用 stylua 或其他格式化工具
+//   // "Lua.format.defaultConfig.indent_style": "space",
+//   // "Lua.format.defaultConfig.indent_size": "2",
+// }
+
+// .vscode/settings.json
 {
   // --- playdate-debug 扩展的配置 ---
   "playdate-debug.sdkPath": "/Users/nknkol/Developer/PlaydateSDK",
-  "playdate-debug.sourcePath": "myProjectName/Source", // 假设您的项目结构中，工作区根目录直接包含 myProjectName
+  "playdate-debug.sourcePath": "myProjectName/Source",
   "playdate-debug.outputPath": "output",
   "playdate-debug.productName": "myProjectName",
 
   // --- lua-language-server (sumneko/vscode-lua) 扩展的配置 ---
-  "Lua.runtime.version": "Lua 5.4", // Playdate 使用 Lua 5.4
+  // 以下大部分配置已移至 .luarc.json，但保留版本指定可能仍有益，
+  // 或者如果 .luarc.json 中的设置未完全生效，可以在此备用。
+  // 通常 .luarc.json 的优先级更高。
+  "Lua.runtime.version": "Lua 5.4", // 可以保留，或依赖 .luarc.json
 
-  "Lua.diagnostics.globals": [
-    "playdate",
-    "import"
-  ],
-
+  // "Lua.diagnostics.globals" 和 "Lua.workspace.library" 现在主要由 .luarc.json 管理
+  // 如果您发现 .luarc.json 中的 workspace.library 没有完全覆盖 CoreLibs，
+  // 或者 playdate-debug 扩展需要这些设置，可以考虑保留或调整这里的 library 设置。
+  // 但为了避免混淆，优先使用 .luarc.json 中 workspace.library 的推荐。
+  // 例如，可以清空这里的 Lua.workspace.library，完全依赖 .luarc.json
   "Lua.workspace.library": [
-    // 1. Playdate SDK 的 CoreLibs 路径
-    //    您需要将 playdate-debug.sdkPath 的值与 "/CrankSDK/CoreLibs" (或实际的CoreLibs子路径) 结合起来
-    //    例如: "/Users/nknkol/Developer/PlaydateSDK/CrankSDK/CoreLibs"
-    //    (请确认您 SDK 中 CoreLibs 的确切子路径，通常在 SDK 根目录下的某个子文件夹里)
-    //    我们先假设一个常见的路径结构，您需要根据实际情况调整：
-    "/Users/nknkol/Developer/PlaydateSDK/CoreLibs", // <--- ***您需要确认这个路径是否准确***
-                                                      // 更有可能是 "/Users/nknkol/Developer/PlaydateSDK/CrankSDK/CoreLibs"
-                                                      // 或者 SDK 直接解压后就是 PlaydateSDK/CoreLibs
-
-    // 2. (可选但推荐) Playdate 全局 API 定义文件所在的目录路径
-    //    这些文件通常由社区提供或包含在类似 playdate-debug 的扩展中。
-    //    如果您有单独的API定义文件夹，请取消注释并修改路径。
-    // "/path/to/your/playdate-api-definitions"
+      // 建议将此处的 CoreLibs 路径也放入 .luarc.json 的 workspace.library 中，
+      // 以保持配置一致性。如果 playdate-luacats 已包含 CoreLibs 的良好定义，
+      // 可能只需要在 .luarc.json 中指向 playdate-luacats 和 SDK 的 CoreLibs 即可。
+      // "/Users/nknkol/Developer/PlaydateSDK/CrankSDK/CoreLibs" // 例如
   ],
-  "luau-lsp.sourcemap.enabled": false,
-  "luau-lsp.sourcemap.autogenerate": false // 通常也建议禁用自动生成
-  // (可选) 改善类型推断和对第三方库的支持
-  // "Lua.type.infernum.mode": "Strict", // 可以尝试更严格的类型推断
+  "Lua.diagnostics.globals": [
+    // "playdate", // 移至 .luarc.json
+    // "import"    // 移至 .luarc.json
+  ],
 
-  // (可选) 其他 lua-language-server 配置
-  // "Lua.completion.callSnippet": "Replace",
-  // "Lua.format.enable": true, // 如果您使用 stylua 或其他格式化工具
-  // "Lua.format.defaultConfig.indent_style": "space",
-  // "Lua.format.defaultConfig.indent_size": "2",
+
+  // 如果您之前添加了禁用 Luau LSP sourcemap 的设置，并且已确认
+  // Luau LSP 不再是问题，或者您不使用它，可以保留或移除。
+  "luau-lsp.sourcemap.enabled": false,
+  "luau-lsp.sourcemap.autogenerate": false
 }
