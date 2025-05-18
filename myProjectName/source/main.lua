@@ -1,6 +1,7 @@
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
+import "strings"
 
 local gfx <const> = playdate.graphics
 
@@ -19,7 +20,6 @@ local strings = {
 }
 
 local lang = strings.en
-
 -- Variables for managing menu and input states
 local selectedOption = 1
 local selectedSubOption = 1
