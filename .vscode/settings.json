@@ -1,5 +1,7 @@
+// .vscode/settings.json (修正后)
 {
-  "Lua.workspace.library": [
-    "/Users/nknkol/Developer/PlaydateSDK/CoreLibs"
-  ]
+  "playdate-debug.sdkPath": "/Users/nknkol/Developer/PlaydateSDK", // 这个路径通常是正确的，指向SDK安装位置
+  "playdate-debug.sourcePath": "myProjectName/Source",       // 相对于工作区根目录的源文件路径
+  "playdate-debug.outputPath": "output",                     // 相对于工作区根目录的输出目录路径
+  "playdate-debug.productName": "myProjectName"              // 你的游戏名
 }

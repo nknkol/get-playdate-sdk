@@ -1,14 +1,12 @@
+// .vscode/launch.json
 {
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "playdate",
       "request": "launch",
-      "type": "playdate", // 必须是 "playdate"
-      "name": "Run app in Playdate simulator", // 在调试配置下拉菜单中显示的名称
-      "source": "${workspaceRoot}/myProjectName/Source", // 你的源文件目录路径
-      "output": "${workspaceRoot}/output.pdx", // 编译后的 .pdx 文件路径
-      // (可选) 如果没有设置 PLAYDATE_SDK_PATH 环境变量，在这里指定 SDK 路径
-      "sdkPath": "/Users/nknkol/Developer/PlaydateSDK"
+      "name": "Playdate: Debug",
+      "preLaunchTask": "${defaultBuildTask}"
     }
   ]
 }
