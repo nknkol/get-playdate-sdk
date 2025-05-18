@@ -115,25 +115,78 @@ function playdate.rightButtonDown()
 	end
 end
 
--- Handle the A button for selecting options or entering input mode
+-- -- Handle the A button for selecting options or entering input mode
+-- local aPressTimer = nil
+-- function playdate.AButtonDown()
+-- 	aPressTimer = playdate.timer.new(1000, function()
+-- 		inputMode += 1
+-- 		if inputMode > 3 then inputMode = 1 end
+-- 	end)
+-- end
+
+-- function playdate.AButtonUp()
+-- 	if aPressTimer.active then
+-- 		aPressTimer:remove()
+-- 		if cursorPos == 0 then
+-- 			cursorPos = 1
+-- 			inputText = {"A"}
+-- 		else
+-- 			cursorPos = 0
+-- 		end
+-- 	end
+-- end
+
 local aPressTimer = nil
+local longPressOccurred = false
+
 function playdate.AButtonDown()
-	aPressTimer = playdate.timer.new(1000, function()
-		inputMode += 1
-		if inputMode > 3 then inputMode = 1 end
-	end)
+    longPressOccurred = false -- 重置长按标志
+    -- 如果之前的计时器由于某些原因没有被正确移除，先移除
+    if aPressTimer then
+        aPressTimer:remove()
+    end
+    aPressTimer = playdate.timer.new(1000) -- 1秒算长按
+    aPressTimer.timerEndedCallback = function()
+        print("长按触发!")
+        inputMode += 1
+        if inputMode > 3 then inputMode = 1 end
+        longPressOccurred = true
+        aPressTimer = nil -- 计时器完成使命后，可以清空
+    end
 end
 
 function playdate.AButtonUp()
-	if aPressTimer.active then
-		aPressTimer:remove()
-		if cursorPos == 0 then
-			cursorPos = 1
-			inputText = {"A"}
-		else
-			cursorPos = 0
-		end
-	end
+    if aPressTimer then
+        -- 如果计时器仍然存在（意味着可能还没到1秒，或者刚到1秒但回调还没来得及清掉它）
+        aPressTimer:remove() -- 立即停止并移除计时器
+        aPressTimer = nil
+
+        if not longPressOccurred then
+            print("短按触发!")
+            if cursorPos == 0 then
+                cursorPos = 1
+                inputText = {"A"}
+            else
+                cursorPos = 0
+            end
+        end
+    else
+        -- 如果 aPressTimer 已经是 nil (可能因为长按已发生并清除了计时器)
+        -- 或者 AButtonDown 没有被正确调用
+        if not longPressOccurred then
+            -- 这种情况下，如果长按也未发生，可能代表一个非常快速的按下和释放
+            -- 或者是一个逻辑上的边缘情况。根据需要处理或忽略。
+            -- 这里我们假设如果长按没发生，就按短按处理。
+            print("短按触发! (timer was nil on up)")
+            if cursorPos == 0 then
+                cursorPos = 1
+                inputText = {"A"}
+            else
+                cursorPos = 0
+            end
+        end
+    end
+    longPressOccurred = false -- 重置以备下次使用
 end
 
 -- Handle the B button for canceling or deleting characters
