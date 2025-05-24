@@ -9,8 +9,9 @@ function attributePanel.draw(state)
     end
     
     -- 计算属性面板位置（屏幕底部）
-    local panelY = 240 - state.attributePanelHeight + (state.attributePanelHeight - state.screenOffset)
-    local panelHeight = state.screenOffset
+    -- screenOffset为负值时表示向上偏移
+    local panelHeight = math.abs(state.screenOffset)  -- 转为正值作为面板高度
+    local panelY = 240 - panelHeight
     
     if panelHeight <= 0 then
         return
@@ -28,7 +29,7 @@ function attributePanel.draw(state)
     gfx.drawLine(0, panelY, 400, panelY)
     
     -- 只有当面板完全展开时才显示内容
-    if state.screenOffset >= state.attributePanelHeight * 0.8 then
+    if panelHeight >= state.attributePanelHeight * 0.8 then
         -- 示例属性信息
         local textY = panelY + 8
         gfx.drawText("攻击力: 15", 10, textY)
