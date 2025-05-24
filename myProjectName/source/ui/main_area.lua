@@ -1,40 +1,3 @@
-
--- -- ui/main_area.lua
--- local gfx <const> = playdate.graphics
--- local langMgr = LangMgr
--- local L
--- local function updateLang() L = langMgr.get() end
-
--- local mainArea = {}
--- function mainArea.draw(state)
---     updateLang()
---     -- 标题与提示
---     gfx.drawText(L.ui.title, 10, 5)
---             -- 添加分割线
---     local separatorY = 20 -- 调整 Y 坐标以适应你的布局
---     gfx.setColor(gfx.kColorBlack) -- 设置分割线颜色为黑色
---     gfx.drawLine(10, separatorY, 390, separatorY) -- 从 x=10 到 x=390 画一条水平线
-
---     gfx.drawText(L.ui.prompt, 10, 25)
-
-
---     -- 选项列表
---     for i, option in ipairs(L.menu) do
---         local y = 50 + (i - 1) * 20
---         if i == state.selectedIndex then
---             local w, h = gfx.getTextSize(option)
---             gfx.fillRect(8, y - 2, w + 4, h)
---             gfx.setImageDrawMode(gfx.kDrawModeInverted)
---             gfx.drawText(option, 10, y)
---             gfx.setImageDrawMode(gfx.kDrawModeCopy)
---         else
---             gfx.drawText(option, 10, y)
---         end
---     end
--- end
--- return mainArea
-
-
 -- ui/main_area.lua
 local gfx <const> = playdate.graphics
 local langMgr = LangMgr
@@ -44,45 +7,81 @@ local function updateLang() L = langMgr.get() end
 local mainArea = {}
 function mainArea.draw(state)
     updateLang()
-    -- 标题与提示
-    gfx.drawText(L.ui.title, 10, 5)
-    gfx.drawText(L.ui.prompt, 10, 25)
+    
+    -- 计算Y轴偏移（屏幕上移）
+    local offsetY = -state.screenOffset
+    
+    -- 设置裁剪区域，防止内容绘制到属性面板区域
+    local clipHeight = 240 - state.screenOffset
+    gfx.setClipRect(0, 0, 400, clipHeight)
+    
+    -- 标题与提示（考虑偏移）
+    gfx.drawText(L.ui.title, 10, 5 + offsetY)
+    
+    -- 添加分割线
+    local separatorY = 20 + offsetY
+    gfx.setColor(gfx.kColorBlack)
+    gfx.drawLine(10, separatorY, 390, separatorY)
+    
+    gfx.drawText(L.ui.prompt, 10, 25 + offsetY)
 
-    -- -- 原来的选项列表循环 (注释掉或删除)
-    -- for i, option in ipairs(L.menu) do
-    --     local y = 50 + (i - 1) * 20
-    --     if i == state.selectedIndex then
-    --         local w, h = gfx.getTextSize(option)
-    --         gfx.fillRect(8, y - 2, w + 4, h)
-    --         gfx.setImageDrawMode(gfx.kDrawModeInverted)
-    --         gfx.drawText(option, 10, y)
-    --         gfx.setImageDrawMode(gfx.kDrawModeCopy)
-    --     else
-    --         gfx.drawText(option, 10, y)
-    --     end
-    -- end
-
-    -- 只显示当前选中的选项
+    -- 显示当前选中的选项
     if L.menu and L.menu[state.selectedIndex] then
         local selectedOptionText = L.menu[state.selectedIndex]
-        local y = 50 -- 固定Y轴位置，或者根据你的布局调整
-                     -- 如果你希望它仍然像之前列表中的第一个选项那样定位，
-                     -- 并且上下键仍然可以切换（只是不显示其他选项），
-                     -- 那么这里的 Y 可能不需要改变，或者只需要一个固定的绘制基线
-
-        -- 绘制选中项 (可以保留高亮效果，也可以简化)
+        local y = 50 + offsetY
+        
+        -- 绘制高亮背景
         local w, h = gfx.getTextSize(selectedOptionText)
-        gfx.fillRect(8, y - 2, w + 4, h) -- 背景高亮
-        gfx.setImageDrawMode(gfx.kDrawModeInverted) -- 反色文字
-        gfx.drawText(selectedOptionText, 10, y) -- 绘制文本
-        gfx.setImageDrawMode(gfx.kDrawModeCopy) -- 恢复绘制模式
-
-        -- 如果不想要高亮和反色，可以简化为：
-        -- gfx.drawText(selectedOptionText, 10, y)
+        gfx.setColor(gfx.kColorBlack)
+        gfx.fillRect(8, y - 2, w + 4, h)
+        
+        -- 绘制反色文字
+        gfx.setImageDrawMode(gfx.kDrawModeInverted)
+        gfx.drawText(selectedOptionText, 10, y)
+        gfx.setImageDrawMode(gfx.kDrawModeCopy)
     else
-        -- 处理 L.menu 为空或 selectedIndex 无效的情况 (可选)
-        print("警告: 无法获取选中的菜单选项。 L.menu 或 state.selectedIndex 可能有问题。")
+        -- 错误处理
+        gfx.setColor(gfx.kColorBlack)
+        gfx.drawText("错误: 无法加载菜单", 10, 50 + offsetY)
+    end
+    
+    -- 显示长按提示（只有在属性面板未显示时）
+    if not state.isAttributeVisible() then
+        gfx.setColor(gfx.kColorBlack)
+        gfx.drawText("长按 ↓ 键查看属性", 10, 200 + offsetY)
+    end
+        -- 长按进度指示器
+    if state.downButtonHoldTime > 0 and not state.isAttributeVisible() then
+        local progress = state.downButtonHoldTime / state.longPressThreshold
+        if progress > 1 then progress = 1 end
+        
+        -- 绘制进度条背景
+        local barWidth = 100
+        local barHeight = 4
+        local barX = (400 - barWidth) / 2  -- 居中
+        local barY = 220 + offsetY
+        
+        gfx.setColor(gfx.kColorBlack)
+        gfx.drawRect(barX - 1, barY - 1, barWidth + 2, barHeight + 2)
+        
+        gfx.setColor(gfx.kColorWhite)
+        gfx.fillRect(barX, barY, barWidth, barHeight)
+        
+        -- 绘制进度
+        gfx.setColor(gfx.kColorBlack)
+        gfx.fillRect(barX, barY, barWidth * progress, barHeight)
+        
+        -- 提示文字
+        gfx.drawText("长按显示属性面板...", barX - 20, barY - 15)
     end
 
+    -- 如果属性面板已显示，显示关闭提示
+    if state.isAttributeVisible() and state.screenOffset >= state.attributePanelHeight * 0.9 then
+        gfx.setColor(gfx.kColorBlack)
+        gfx.drawText("↑ 屏幕已上移 - 按A/B关闭", 10, 180 + offsetY)
+    end
+    -- 清除裁剪区域
+    gfx.clearClipRect()
 end
+
 return mainArea
