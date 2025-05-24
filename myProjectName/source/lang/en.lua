@@ -1,11 +1,10 @@
-
 -- lang/en.lua (增强版)
 return {
     ui = { 
         title = "Dungeon Demo", 
         prompt = "Choose action:",
         skillPanel = "⚡ Skill Info",
-        closeHint = "Press A or B to close"
+        closeHint = "Press B to close"
     },
     menu = { "Attack", "Taunt", "Flee" },
     skills = {

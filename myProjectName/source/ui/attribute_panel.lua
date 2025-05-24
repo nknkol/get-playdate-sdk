@@ -32,15 +32,15 @@ function attributePanel.draw(state)
     if panelHeight >= state.attributePanelHeight * 0.8 then
         -- 示例属性信息
         local textY = panelY + 8
-        gfx.drawText("攻击力: 15", 10, textY)
-        gfx.drawText("防御力: 8", 150, textY)
-        gfx.drawText("生命值: 100/120", 10, textY + 16)
-        gfx.drawText("魔法值: 50/60", 150, textY + 16)
-        gfx.drawText("金币: 250", 10, textY + 32)
-        gfx.drawText("等级: 5", 150, textY + 32)
+        gfx.drawText("⚔️ 攻击力: 15", 10, textY)
+        gfx.drawText("🛡️ 防御力: 8", 150, textY)
+        gfx.drawText("❤️ 生命值: 100/120", 10, textY + 16)
+        gfx.drawText("⚡ 魔法值: 50/60", 150, textY + 16)
+        gfx.drawText("💰 金币: 250", 10, textY + 32)
+        gfx.drawText("📈 等级: 5", 150, textY + 32)
         
         -- 提示文字
-        gfx.drawText("按 A 或 B 键关闭", 280, textY)
+        gfx.drawText("按 B 键关闭", 280, textY)
     end
 end
 

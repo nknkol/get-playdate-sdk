@@ -1,10 +1,11 @@
+
 -- lang/zh.lua (增强版)
 return {
     ui = { 
         title = "Dungeon Demo", 
         prompt = "请选择行动：",
         skillPanel = "⚡ 技能说明",
-        closeHint = "按 A 或 B 键关闭"
+        closeHint = "按 B 键关闭"
     },
     menu = { "攻击", "嘲讽", "撤退" },
     skills = {

@@ -64,7 +64,8 @@ function mainArea.draw(state)
     end
     
     -- 长按进度指示器 - 上键（技能面板）
-    if state.upButtonHoldTime > 0 and not state.isPanelVisible() then
+    -- 只有当按键时间超过阈值的1/3时才显示进度条
+    if state.upButtonHoldTime > state.longPressThreshold / 3 and not state.isPanelVisible() then
         local progress = state.upButtonHoldTime / state.longPressThreshold
         if progress > 1 then progress = 1 end
         
@@ -85,7 +86,8 @@ function mainArea.draw(state)
     end
     
     -- 长按进度指示器 - 下键（属性面板）
-    if state.downButtonHoldTime > 0 and not state.isPanelVisible() then
+    -- 只有当按键时间超过阈值的1/3时才显示进度条
+    if state.downButtonHoldTime > state.longPressThreshold / 3 and not state.isPanelVisible() then
         local progress = state.downButtonHoldTime / state.longPressThreshold
         if progress > 1 then progress = 1 end
         
@@ -108,10 +110,10 @@ function mainArea.draw(state)
     -- 面板状态提示
     if state.isSkillVisible() and state.screenOffset >= state.skillPanelHeight * 0.9 then
         gfx.setColor(gfx.kColorBlack)
-        gfx.drawText("↓ 屏幕已下移 - 按A/B关闭", 10, 100 + offsetY)
+        gfx.drawText("↑/↓ 切换技能 - 按B键关闭", 10, 100 + offsetY)
     elseif state.isAttributeVisible() and math.abs(state.screenOffset) >= state.attributePanelHeight * 0.9 then
         gfx.setColor(gfx.kColorBlack)
-        gfx.drawText("↑ 屏幕已上移 - 按A/B关闭", 10, 180 + offsetY)
+        gfx.drawText("↑/↓ 切换选项 - 按B键关闭", 10, 180 + offsetY)
     end
     
     -- 清除裁剪区域

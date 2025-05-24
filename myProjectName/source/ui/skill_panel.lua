@@ -34,7 +34,7 @@ function skillPanel.draw(state)
         -- 技能面板标题
         local l = LangMgr.get()
         gfx.drawText(l.ui.skillPanel or "⚡ 技能说明", 10, textY)
-        gfx.drawText(l.ui.closeHint or "按 A 或 B 键关闭", 280, textY)
+        gfx.drawText(l.ui.closeHint or "按 B 键关闭", 280, textY)
         
         -- 当前选中技能的详细说明
         if l.menu and l.menu[state.selectedIndex] then

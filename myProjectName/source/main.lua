@@ -47,18 +47,18 @@ function playdate.update()
     -- 更新计时器
     playdate.timer.updateTimers()
     
-    -- 调试信息（发布时可删除）
-    if playdate.isDebugBuild then
-        gfx.setColor(gfx.kColorBlack)
-        gfx.drawText("Offset: " .. math.floor(GameState.screenOffset), 300, 5)
-        gfx.drawText("Down: " .. GameState.downButtonHoldTime, 300, 20)
-        gfx.drawText("Up: " .. GameState.upButtonHoldTime, 300, 35)
+    -- -- 调试信息（发布时可删除）
+    -- if playdate.isDebugBuild then
+    --     gfx.setColor(gfx.kColorBlack)
+    --     gfx.drawText("Offset: " .. math.floor(GameState.screenOffset), 300, 5)
+    --     gfx.drawText("Down: " .. GameState.downButtonHoldTime, 300, 20)
+    --     gfx.drawText("Up: " .. GameState.upButtonHoldTime, 300, 35)
         
-        -- 面板状态指示
-        if GameState.isSkillVisible() then
-            gfx.drawText("Skill Panel", 300, 50)
-        elseif GameState.isAttributeVisible() then
-            gfx.drawText("Attr Panel", 300, 50)
-        end
-    end
+    --     -- 面板状态指示
+    --     if GameState.isSkillVisible() then
+    --         gfx.drawText("Skill Panel", 300, 50)
+    --     elseif GameState.isAttributeVisible() then
+    --         gfx.drawText("Attr Panel", 300, 50)
+    --     end
+    -- end
 end

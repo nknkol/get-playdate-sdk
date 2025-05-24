@@ -26,8 +26,8 @@ function mainController.update()
     else
         -- 释放下键时的处理
         if gameState.downButtonHoldTime > 0 then
-            -- 如果是短按（未达到长按阈值）且没有面板显示，则正常切换菜单
-            if gameState.downButtonHoldTime < gameState.longPressThreshold and not gameState.isPanelVisible() then
+            -- 如果是短按（未达到长按阈值），则正常切换菜单
+            if gameState.downButtonHoldTime < gameState.longPressThreshold then
                 gameState.selectedIndex += 1
                 if gameState.selectedIndex > #l.menu then
                     gameState.selectedIndex = 1
@@ -56,8 +56,8 @@ function mainController.update()
     else
         -- 释放上键时的处理
         if gameState.upButtonHoldTime > 0 then
-            -- 如果是短按（未达到长按阈值）且没有面板显示，则正常切换菜单
-            if gameState.upButtonHoldTime < gameState.longPressThreshold and not gameState.isPanelVisible() then
+            -- 如果是短按（未达到长按阈值），则正常切换菜单
+            if gameState.upButtonHoldTime < gameState.longPressThreshold then
                 gameState.selectedIndex -= 1
                 if gameState.selectedIndex < 1 then
                     gameState.selectedIndex = #l.menu
@@ -69,15 +69,10 @@ function mainController.update()
     
     -- A键确认选择
     if playdate.buttonJustPressed(playdate.kButtonA) then
-        if gameState.isPanelVisible() then
-            -- 有面板显示时，A键关闭所有面板
-            gameState.hideAllPanels()
-        else
-            -- 执行选中的动作
-            local selectedAction = l.menu[gameState.selectedIndex]
-            print("执行动作: " .. selectedAction)
-            -- 这里可以添加具体的动作处理逻辑
-        end
+        -- A键始终执行选中的动作，不受面板状态影响
+        local selectedAction = l.menu[gameState.selectedIndex]
+        print("执行动作: " .. selectedAction)
+        -- 这里可以添加具体的动作处理逻辑
     end
     
     -- B键处理
