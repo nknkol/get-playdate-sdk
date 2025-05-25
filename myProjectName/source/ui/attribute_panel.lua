@@ -9,41 +9,19 @@ local attributePanel = {}
 
 -- ===== 抖动背景生成函数 =====
 local function drawDitheredBackground(x, y, width, height)
-    -- 先绘制白色背景
-    gfx.setColor(gfx.kColorWhite)
-    gfx.fillRect(x, y, width, height)
-    
-    -- 绘制固定的抖动图案（模拟半透明效果）
+    -- 不绘制背景！让白点区域透明显示底部内容
+    -- 只绘制黑点作为面板背景
     gfx.setColor(gfx.kColorBlack)
     
-    -- 选项1：经典50%密度抖动图案
+    -- 绘制50%密度的抖动图案（只绘制黑点）
     for i = 0, width - 1 do
         for j = 0, height - 1 do
             if (i + j) % 2 == 0 then
                 gfx.fillRect(x + i, y + j, 1, 1)
             end
+            -- 白点区域不绘制任何内容，保持透明
         end
     end
-    
-    -- 如果想要其他密度，可以替换上面的代码：
-    
-    -- 选项2：25%密度（更透明）
-    -- for i = 0, width - 1, 2 do
-    --     for j = 0, height - 1, 2 do
-    --         if (i / 2 + j / 2) % 2 == 0 then
-    --             gfx.fillRect(x + i, y + j, 1, 1)
-    --         end
-    --     end
-    -- end
-    
-    -- 选项3：75%密度（更不透明）
-    -- for i = 0, width - 1 do
-    --     for j = 0, height - 1 do
-    --         if not ((i + j) % 4 == 1 or (i + j) % 4 == 2) then
-    --             gfx.fillRect(x + i, y + j, 1, 1)
-    --         end
-    --     end
-    -- end
 end
 
 -- ===== 属性面板绘制区域 =====

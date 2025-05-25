@@ -47,7 +47,13 @@ function mainArea.draw(state, textController)
     }
     
     -- ===== 统一窗口偏移计算区域 =====
-    local windowOffsetY = state.screenOffset or 0  -- 整个内容窗口的偏移量
+    -- 只有技能面板显示时才推动主页，属性面板是覆盖效果
+    local windowOffsetY = 0
+    if isSkillVisible then
+        windowOffsetY = state.screenOffset  -- 技能面板：推动主页
+    else
+        windowOffsetY = 0  -- 属性面板：不推动主页，保持覆盖效果
+    end
     
     -- --- 裁剪区域设置 ---
     local clipY = 0
