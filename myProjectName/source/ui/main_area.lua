@@ -1,4 +1,4 @@
--- ui/main_area.lua - 主界面文本显示区域（修复文本区域高度计算）
+-- ui/main_area.lua - 主界面文本显示区域（统一窗口动画）
 
 -- ===== 依赖导入区域 =====
 local gfx <const> = playdate.graphics
@@ -46,13 +46,12 @@ function mainArea.draw(state, textController)
         visibleAreaHeight = 150
     }
     
-    -- ===== 屏幕偏移计算区域 =====
-    local offsetY = state.screenOffset or 0  -- 正值=下移，负值=上移
+    -- ===== 统一窗口偏移计算区域 =====
+    local windowOffsetY = state.screenOffset or 0  -- 整个内容窗口的偏移量
     
     -- --- 裁剪区域设置 ---
     local clipY = 0
     local clipHeight = 240
-    local contentStartY = 45  -- 内容开始Y位置（相对于裁剪区域的顶部）
     
     -- 安全检查 state 方法
     local isSkillVisible = (state.isSkillVisible and state.isSkillVisible()) or false
@@ -63,24 +62,23 @@ function mainArea.draw(state, textController)
         -- 技能面板显示时，裁剪区域从技能面板底部开始
         clipY = state.screenOffset
         clipHeight = 240 - state.screenOffset
-        -- contentStartY保持相对于裁剪区域顶部的固定偏移
-        contentStartY = 45
     elseif isAttributeVisible then
         -- 属性面板显示时，裁剪区域高度减少
         clipHeight = 240 + state.screenOffset  -- screenOffset为负值
-        contentStartY = 45
     end
     
     gfx.setClipRect(0, clipY, 400, clipHeight)
     
-    -- ===== 标题和导航区域 =====
+    -- ===== 统一窗口内容区域（所有元素使用相同的基础偏移） =====
+    local baseY = windowOffsetY  -- 窗口基础偏移
+    
+    -- --- 标题区域 ---
     gfx.setColor(gfx.kColorBlack)
-    -- 标题位置相对于裁剪区域计算
-    local titleY = clipY + 5
+    local titleY = baseY + 5
     gfx.drawText(textContent.title, 10, titleY)
     
     -- --- 分割线 ---
-    local separatorY = clipY + 20
+    local separatorY = baseY + 20
     gfx.drawLine(10, separatorY, 390, separatorY)
     
     -- --- 滚动指示器 ---
@@ -96,9 +94,25 @@ function mainArea.draw(state, textController)
     end
     
     -- ===== 文本内容显示区域 =====
-    local textAreaY = clipY + contentStartY
-    -- 修复：文本区域高度应该是裁剪区域高度减去标题区域高度
-    local textAreaHeight = clipHeight - contentStartY - 10  -- 这里的计算是正确的，因为contentStartY现在是相对偏移
+    local textAreaStartY = baseY + 45  -- 文本区域开始位置（与窗口其他元素保持一致的偏移）
+    
+    -- 计算文本区域的实际可用高度
+    local textAreaHeight
+    if isSkillVisible then
+        -- 技能面板模式：可用高度 = 裁剪区域底部 - 文本区域开始位置 - 底部预留
+        textAreaHeight = (clipY + clipHeight) - textAreaStartY - 10
+    elseif isAttributeVisible then
+        -- 属性面板模式：可用高度 = 裁剪区域底部 - 文本区域开始位置 - 底部预留
+        textAreaHeight = clipHeight - (textAreaStartY - windowOffsetY) - 10
+    else
+        -- 正常模式：可用高度 = 屏幕底部 - 文本区域开始位置 - 底部预留
+        textAreaHeight = 240 - textAreaStartY - 10
+    end
+    
+    -- 确保文本区域高度为正值
+    if textAreaHeight < 0 then
+        textAreaHeight = 0
+    end
     
     -- --- 文本内容绘制 ---
     gfx.setColor(gfx.kColorBlack)
@@ -111,10 +125,11 @@ function mainArea.draw(state, textController)
     for i = firstVisibleLine, lastVisibleLine do
         local line = textContent.content[i]
         if line then
-            local lineY = textAreaY + (i - 1) * scrollState.lineHeight - scrollState.scrollOffset
+            -- 文本行的Y位置 = 文本区域开始位置 + 行偏移 - 滚动偏移
+            local lineY = textAreaStartY + (i - 1) * scrollState.lineHeight - scrollState.scrollOffset
             
             -- 只绘制在可见区域内的行
-            if lineY >= textAreaY - scrollState.lineHeight and lineY <= textAreaY + textAreaHeight then
+            if lineY >= textAreaStartY - scrollState.lineHeight and lineY <= textAreaStartY + textAreaHeight then
                 if line == "" then
                     -- 空行不绘制任何内容
                 elseif string.sub(line, 1, 3) == "---" then
@@ -132,9 +147,9 @@ function mainArea.draw(state, textController)
     end
     
     -- ===== 滚动条绘制区域 =====
-    if scrollState.maxScrollOffset > 0 then
+    if scrollState.maxScrollOffset > 0 and textAreaHeight > 0 then
         local scrollBarX = 390
-        local scrollBarY = textAreaY
+        local scrollBarY = textAreaStartY
         local scrollBarHeight = textAreaHeight
         local scrollBarWidth = 3
         
@@ -152,7 +167,7 @@ function mainArea.draw(state, textController)
         gfx.fillRect(scrollBarX, sliderY, scrollBarWidth, sliderHeight)
     end
     
-    -- ===== 长按进度指示器区域 =====
+    -- ===== 长按进度指示器区域（也使用统一的窗口偏移） =====
     local upButtonHoldTime = state.upButtonHoldTime or 0
     local downButtonHoldTime = state.downButtonHoldTime or 0
     local bButtonHoldTime = state.bButtonHoldTime or 0
@@ -166,7 +181,7 @@ function mainArea.draw(state, textController)
         local barWidth = 100
         local barHeight = 4
         local barX = (400 - barWidth) / 2
-        local barY = clipY + 30
+        local barY = baseY + 30
         
         -- 进度条绘制
         gfx.setColor(gfx.kColorBlack)
@@ -187,8 +202,7 @@ function mainArea.draw(state, textController)
         local barWidth = 100
         local barHeight = 4
         local barX = (400 - barWidth) / 2
-        -- 修复：下键进度条位置应该相对于裁剪区域计算
-        local barY = clipY + clipHeight - 20
+        local barY = baseY + 220
         
         -- 进度条绘制
         gfx.setColor(gfx.kColorBlack)
@@ -209,7 +223,7 @@ function mainArea.draw(state, textController)
         local barWidth = 100
         local barHeight = 4
         local barX = (400 - barWidth) / 2
-        local barY = clipY + clipHeight / 2
+        local barY = baseY + 120
         
         -- 进度条绘制
         gfx.setColor(gfx.kColorBlack)
@@ -220,16 +234,6 @@ function mainArea.draw(state, textController)
         gfx.fillRect(barX, barY, barWidth * progress, barHeight)
         
         gfx.drawText("长按关闭面板...", barX - 10, barY - 15)
-    end
-    
-    -- ===== 面板状态提示区域 =====
-    local skillPanelHeight = state.skillPanelHeight or 80
-    local attributePanelHeight = state.attributePanelHeight or 70
-    
-    if isSkillVisible and state.screenOffset >= skillPanelHeight * 0.9 then
-        -- 可以在这里添加技能面板的额外提示
-    elseif isAttributeVisible and math.abs(state.screenOffset) >= attributePanelHeight * 0.9 then
-        -- 可以在这里添加属性面板的额外提示
     end
     
     -- ===== 清理区域 =====
