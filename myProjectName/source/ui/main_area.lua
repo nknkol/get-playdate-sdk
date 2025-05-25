@@ -184,25 +184,36 @@ function mainArea.draw(state, textController)
     local bButtonHoldTime = state.bButtonHoldTime or 0
     local longPressThreshold = state.longPressThreshold or 30
     
-    -- --- 上键进度条（技能面板）---
+    -- --- 上键进度条（技能面板）- 空心圆形右上角 ---
     if upButtonHoldTime > longPressThreshold / 3 and not isPanelVisible then
         local progress = upButtonHoldTime / longPressThreshold
         if progress > 1 then progress = 1 end
         
-        local barWidth = 100
-        local barHeight = 4
-        local barX = (400 - barWidth) / 2
-        local barY = baseY + 30
+        -- 空心圆形进度条参数
+        local centerX = 380  -- 右上角X位置
+        local centerY = baseY + 20  -- 右上角Y位置  
+        local radius = 8  -- 圆形半径
         
-        -- 进度条绘制
         gfx.setColor(gfx.kColorBlack)
-        gfx.drawRect(barX - 1, barY - 1, barWidth + 2, barHeight + 2)
-        gfx.setColor(gfx.kColorWhite)
-        gfx.fillRect(barX, barY, barWidth, barHeight)
-        gfx.setColor(gfx.kColorBlack)
-        gfx.fillRect(barX, barY, barWidth * progress, barHeight)
         
-        gfx.drawText("长按显示技能面板...", barX - 20, barY - 15)
+        -- 绘制外圆边框（空心）
+        gfx.drawCircleAtPoint(centerX, centerY, radius)
+        
+        -- 绘制进度弧线（沿着圆周）
+        if progress > 0 then
+            -- 计算进度角度（从顶部开始，顺时针）
+            local totalAngle = progress * 360
+            
+            -- 绘制进度弧线
+            for angle = 0, totalAngle, 2 do
+                local radian = math.rad(angle - 90)  -- 从顶部(-90°)开始
+                local x = centerX + math.cos(radian) * radius
+                local y = centerY + math.sin(radian) * radius
+                
+                -- 绘制圆周上的点，形成粗弧线
+                gfx.fillRect(x - 1, y - 1, 2, 2)  -- 2x2像素的粗点
+            end
+        end
     end
     
     -- --- 下键进度条（属性面板）---
