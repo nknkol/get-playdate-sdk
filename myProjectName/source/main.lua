@@ -142,7 +142,7 @@ function playdate.update()
         controller.update()
     end
     
-    -- --- 动画更新区 ---
+    -- --- 动画更新区（确保每帧都更新） ---
     if GameState and GameState.updateAnimation then
         GameState.updateAnimation()
     end
@@ -163,8 +163,8 @@ function playdate.update()
     if currentMode == "text_mode" then
         -- 文本滚动模式：显示文本内容
         
-        -- 技能面板（顶层）
-        if GameState.showSkill and skillPanel then
+        -- 技能面板（顶层）- 基于动画状态显示
+        if (GameState.screenOffset > 0 or GameState.targetOffset > 0) and skillPanel then
             skillPanel.draw(GameState)
         end
         
@@ -179,16 +179,16 @@ function playdate.update()
             statusPanel.draw(GameState)
         end
         
-        -- 属性面板（底层）
-        if GameState.showAttribute and attributePanel then
+        -- 属性面板（底层）- 基于动画状态显示
+        if (GameState.screenOffset < 0 or GameState.targetOffset < 0) and attributePanel then
             attributePanel.draw(GameState)
         end
         
     elseif currentMode == "main_sentence" then
         -- 菜单导航模式：显示菜单界面
         
-        -- 技能面板（顶层）
-        if GameState.showSkill and skillPanel then
+        -- 技能面板（顶层）- 基于动画状态显示
+        if (GameState.screenOffset > 0 or GameState.targetOffset > 0) and skillPanel then
             skillPanel.draw(GameState)
         end
         
@@ -207,8 +207,8 @@ function playdate.update()
             statusPanel.draw(GameState)
         end
         
-        -- 属性面板（底层）
-        if GameState.showAttribute and attributePanel then
+        -- 属性面板（底层）- 基于动画状态显示
+        if (GameState.screenOffset < 0 or GameState.targetOffset < 0) and attributePanel then
             attributePanel.draw(GameState)
         end
         
@@ -225,8 +225,8 @@ function playdate.update()
             statusPanel.draw(GameState)
         end
         
-        -- 属性面板
-        if GameState.showAttribute and attributePanel then
+        -- 属性面板 - 基于动画状态显示
+        if (GameState.screenOffset < 0 or GameState.targetOffset < 0) and attributePanel then
             attributePanel.draw(GameState)
         end
     end

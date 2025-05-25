@@ -1,4 +1,4 @@
--- data/game_state.lua - 游戏状态管理中心
+-- data/game_state.lua - 游戏状态管理中心（修复动画版）
 
 -- ===== 核心状态数据区域 =====
 local state = {
@@ -16,7 +16,7 @@ local state = {
     targetOffset = 0,           -- 目标偏移量
     attributePanelHeight = 70,  -- 属性面板高度（底部）
     skillPanelHeight = 80,      -- 技能面板高度（顶部）
-    animationSpeed = 8,         -- 动画速度
+    animationSpeed = 6,         -- 动画速度（调整为更平滑）
     
     -- --- 按键长按检测 ---
     downButtonHoldTime = 0,     -- 下键按住时间
@@ -89,19 +89,21 @@ function state.isPanelVisible()
     return state.isAttributeVisible() or state.isSkillVisible()
 end
 
--- ===== 面板控制操作区域 =====
+-- ===== 面板控制操作区域（修复动画问题） =====
 
 -- --- 属性面板控制 ---
 function state.showAttributePanel()
     state.targetOffset = -state.attributePanelHeight  -- 向上移动（负值）
     state.showAttribute = true
     state.showSkill = false
+    print("显示属性面板，目标偏移: " .. state.targetOffset)
 end
 
 function state.hideAttributePanel()
     if state.isAttributeVisible() then
         state.targetOffset = 0
-        state.showAttribute = false
+        -- 注意：不立即设置 showAttribute = false，让动画完成后再隐藏
+        print("隐藏属性面板，目标偏移: " .. state.targetOffset)
     end
 end
 
@@ -110,29 +112,51 @@ function state.showSkillPanel()
     state.targetOffset = state.skillPanelHeight  -- 向下移动（正值）
     state.showSkill = true
     state.showAttribute = false
+    print("显示技能面板，目标偏移: " .. state.targetOffset)
 end
 
 function state.hideSkillPanel()
     if state.isSkillVisible() then
         state.targetOffset = 0
-        state.showSkill = false
+        -- 注意：不立即设置 showSkill = false，让动画完成后再隐藏
+        print("隐藏技能面板，目标偏移: " .. state.targetOffset)
     end
 end
 
 -- --- 全部面板关闭 ---
 function state.hideAllPanels()
     state.targetOffset = 0
-    state.showAttribute = false
-    state.showSkill = false
+    -- 注意：不立即设置面板状态，让动画完成后再隐藏
+    print("隐藏所有面板，目标偏移: " .. state.targetOffset)
 end
 
--- ===== 动画更新区域 =====
+-- ===== 动画更新区域（修复版） =====
 function state.updateAnimation()
+    local threshold = 1.0  -- 动画阈值
+    
     -- 平滑动画插值计算
-    if math.abs(state.screenOffset - state.targetOffset) > 1 then
-        state.screenOffset += (state.targetOffset - state.screenOffset) / state.animationSpeed
+    if math.abs(state.screenOffset - state.targetOffset) > threshold then
+        local delta = (state.targetOffset - state.screenOffset) / state.animationSpeed
+        state.screenOffset += delta
+        
+        -- 调试输出（可选）
+        -- print("动画中: 当前=" .. math.floor(state.screenOffset) .. ", 目标=" .. state.targetOffset)
     else
+        -- 动画完成，设置到目标位置
         state.screenOffset = state.targetOffset
+        
+        -- 动画完成后，更新面板显示状态
+        if state.targetOffset == 0 then
+            -- 面板完全隐藏时，更新状态
+            if state.showAttribute then
+                state.showAttribute = false
+                print("属性面板动画完成，已隐藏")
+            end
+            if state.showSkill then
+                state.showSkill = false
+                print("技能面板动画完成，已隐藏")
+            end
+        end
     end
 end
 
