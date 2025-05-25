@@ -1,4 +1,4 @@
--- ui/main_area.lua - 主界面文本显示区域（支持滚动）
+-- ui/main_area.lua - 主界面文本显示区域（修复文本区域高度计算）
 
 -- ===== 依赖导入区域 =====
 local gfx <const> = playdate.graphics
@@ -40,7 +40,7 @@ function mainArea.draw(state, textController)
     local scrollState = textController and textController.getScrollState() or { 
         scrollOffset = 0, 
         maxScrollOffset = 0,
-        lineHeight = 18,            -- 更新为新的行高
+        lineHeight = 18,
         maxVisibleLines = 10,
         totalContentHeight = 0,
         visibleAreaHeight = 150
@@ -52,7 +52,7 @@ function mainArea.draw(state, textController)
     -- --- 裁剪区域设置 ---
     local clipY = 0
     local clipHeight = 240
-    local contentStartY = 45  -- 内容开始Y位置
+    local contentStartY = 45  -- 内容开始Y位置（相对于裁剪区域的顶部）
     
     -- 安全检查 state 方法
     local isSkillVisible = (state.isSkillVisible and state.isSkillVisible()) or false
@@ -60,21 +60,27 @@ function mainArea.draw(state, textController)
     local isPanelVisible = (state.isPanelVisible and state.isPanelVisible()) or false
     
     if isSkillVisible then
+        -- 技能面板显示时，裁剪区域从技能面板底部开始
         clipY = state.screenOffset
         clipHeight = 240 - state.screenOffset
-        contentStartY = 45 + state.screenOffset
+        -- contentStartY保持相对于裁剪区域顶部的固定偏移
+        contentStartY = 45
     elseif isAttributeVisible then
+        -- 属性面板显示时，裁剪区域高度减少
         clipHeight = 240 + state.screenOffset  -- screenOffset为负值
+        contentStartY = 45
     end
     
     gfx.setClipRect(0, clipY, 400, clipHeight)
     
     -- ===== 标题和导航区域 =====
     gfx.setColor(gfx.kColorBlack)
-    gfx.drawText(textContent.title, 10, 5 + offsetY)
+    -- 标题位置相对于裁剪区域计算
+    local titleY = clipY + 5
+    gfx.drawText(textContent.title, 10, titleY)
     
     -- --- 分割线 ---
-    local separatorY = 20 + offsetY
+    local separatorY = clipY + 20
     gfx.drawLine(10, separatorY, 390, separatorY)
     
     -- --- 滚动指示器 ---
@@ -83,15 +89,16 @@ function mainArea.draw(state, textController)
         local currentLine = math.floor(scrollState.scrollOffset / scrollState.lineHeight) + 1
         local totalLines = #textContent.content
         local indicatorText = string.format("行: %d/%d (%d%%)", currentLine, totalLines, math.floor(scrollPercent * 100))
-        gfx.drawText(indicatorText, 240, 5 + offsetY)
+        gfx.drawText(indicatorText, 240, titleY)
     else
         local totalLines = #textContent.content
-        gfx.drawText("行: 1/" .. totalLines, 240, 5 + offsetY)
+        gfx.drawText("行: 1/" .. totalLines, 240, titleY)
     end
     
     -- ===== 文本内容显示区域 =====
-    local textAreaY = contentStartY
-    local textAreaHeight = clipHeight - contentStartY - 10  -- 减少底部预留空间（原来是40）
+    local textAreaY = clipY + contentStartY
+    -- 修复：文本区域高度应该是裁剪区域高度减去标题区域高度
+    local textAreaHeight = clipHeight - contentStartY - 10  -- 这里的计算是正确的，因为contentStartY现在是相对偏移
     
     -- --- 文本内容绘制 ---
     gfx.setColor(gfx.kColorBlack)
@@ -159,7 +166,7 @@ function mainArea.draw(state, textController)
         local barWidth = 100
         local barHeight = 4
         local barX = (400 - barWidth) / 2
-        local barY = 30 + offsetY
+        local barY = clipY + 30
         
         -- 进度条绘制
         gfx.setColor(gfx.kColorBlack)
@@ -180,7 +187,8 @@ function mainArea.draw(state, textController)
         local barWidth = 100
         local barHeight = 4
         local barX = (400 - barWidth) / 2
-        local barY = 220 + offsetY
+        -- 修复：下键进度条位置应该相对于裁剪区域计算
+        local barY = clipY + clipHeight - 20
         
         -- 进度条绘制
         gfx.setColor(gfx.kColorBlack)
@@ -201,7 +209,7 @@ function mainArea.draw(state, textController)
         local barWidth = 100
         local barHeight = 4
         local barX = (400 - barWidth) / 2
-        local barY = 120 + offsetY
+        local barY = clipY + clipHeight / 2
         
         -- 进度条绘制
         gfx.setColor(gfx.kColorBlack)
@@ -219,11 +227,9 @@ function mainArea.draw(state, textController)
     local attributePanelHeight = state.attributePanelHeight or 70
     
     if isSkillVisible and state.screenOffset >= skillPanelHeight * 0.9 then
-        -- gfx.setColor(gfx.kColorBlack)
-        -- gfx.drawText("↑/↓ 切换技能 - 长按B键关闭", 10, 100 + offsetY)
+        -- 可以在这里添加技能面板的额外提示
     elseif isAttributeVisible and math.abs(state.screenOffset) >= attributePanelHeight * 0.9 then
-        -- gfx.setColor(gfx.kColorBlack)
-        -- gfx.drawText("↑/↓ 切换选项 - 长按B键关闭", 10, 150 + offsetY)
+        -- 可以在这里添加属性面板的额外提示
     end
     
     -- ===== 清理区域 =====
