@@ -40,7 +40,7 @@ function mainArea.draw(state, textController)
     local scrollState = textController and textController.getScrollState() or { 
         scrollOffset = 0, 
         maxScrollOffset = 0,
-        lineHeight = 16,
+        lineHeight = 18,            -- 更新为新的行高
         maxVisibleLines = 10,
         totalContentHeight = 0,
         visibleAreaHeight = 150
@@ -80,8 +80,13 @@ function mainArea.draw(state, textController)
     -- --- 滚动指示器 ---
     if scrollState.maxScrollOffset > 0 then
         local scrollPercent = scrollState.scrollOffset / scrollState.maxScrollOffset
-        local indicatorText = string.format("滚动: %d%%", math.floor(scrollPercent * 100))
-        gfx.drawText(indicatorText, 300, 5 + offsetY)
+        local currentLine = math.floor(scrollState.scrollOffset / scrollState.lineHeight) + 1
+        local totalLines = #textContent.content
+        local indicatorText = string.format("行: %d/%d (%d%%)", currentLine, totalLines, math.floor(scrollPercent * 100))
+        gfx.drawText(indicatorText, 240, 5 + offsetY)
+    else
+        local totalLines = #textContent.content
+        gfx.drawText("行: 1/" .. totalLines, 240, 5 + offsetY)
     end
     
     -- ===== 文本内容显示区域 =====
@@ -147,11 +152,11 @@ function mainArea.draw(state, textController)
         
         -- --- 滚动和面板操作提示 ---
         if scrollState.maxScrollOffset > 0 then
-            gfx.drawText("↑↓ 滚动文本 | 长按 ↑ 技能 | 长按 ↓ 属性", 10, hintY)
+            gfx.drawText("↑↓ 滚动文本 | A键 快速跳转 | 长按↑↓ 面板", 10, hintY)
         else
             gfx.drawText("长按 ↑ 技能 | 长按 ↓ 属性 | B键切换模式", 10, hintY)
         end
-        gfx.drawText("短按 B 键切换模式", 10, hintY + 15)
+        gfx.drawText("短按 B 键切换模式 | 摇杆精细滚动", 10, hintY + 15)
     end
     
     -- ===== 长按进度指示器区域 =====

@@ -91,21 +91,16 @@ function textController.update()
         end
     end
     
-    -- ===== A键功能处理区域（可自定义） =====
+    -- ===== A键功能处理区域（快速跳转） =====
     if playdate.buttonJustPressed(playdate.kButtonA) then
-        -- 在文本模式下，A键可以用作其他功能
-        -- 例如：快速滚动到顶部或底部
-        local scrollState = textController.getScrollInfo()
-        if scrollState.scrollPercent > 0.5 then
+        -- 在文本模式下，A键用于快速跳转
+        local scrollInfo = textController.getScrollInfo()
+        if scrollInfo.scrollPercent > 0.5 then
             -- 如果滚动超过一半，跳转到顶部
-            textController.setContent(nil, nil)  -- 重置滚动位置
-            print("跳转到文本顶部")
+            textController.scrollToTop()
         else
             -- 否则跳转到底部
-            for i = 1, 50 do  -- 滚动足够多次到达底部
-                textController.scrollDown()
-            end
-            print("跳转到文本底部")
+            textController.scrollToBottom()
         end
     end
     
@@ -164,8 +159,8 @@ end
 local scrollState = {
     scrollOffset = 0,           -- 当前滚动偏移量（正值=向上滚动）
     targetScrollOffset = 0,     -- 目标滚动偏移量
-    scrollSpeed = 4,            -- 滚动动画速度
-    lineHeight = 16,            -- 行高
+    scrollSpeed = 3,            -- 滚动动画速度（降低以获得更快响应）
+    lineHeight = 18,            -- 行高（增加以获得更明显的滚动）
     maxVisibleLines = 0,        -- 可见行数（动态计算）
     totalContentHeight = 0,     -- 内容总高度
     visibleAreaHeight = 0,      -- 可见区域高度
@@ -190,11 +185,14 @@ local function calculateContentDimensions(visibleHeight)
     
     -- 计算最大滚动偏移量，确保最后一行能完全显示
     scrollState.maxScrollOffset = math.max(0, scrollState.totalContentHeight - scrollState.visibleAreaHeight)
+    
+    -- 调试信息
+    -- print("内容高度: " .. scrollState.totalContentHeight .. ", 可见高度: " .. scrollState.visibleAreaHeight .. ", 最大滚动: " .. scrollState.maxScrollOffset)
 end
 
 local function updateScrollAnimation()
-    -- 平滑滚动动画
-    if math.abs(scrollState.scrollOffset - scrollState.targetScrollOffset) > 1 then
+    -- 平滑滚动动画，但响应更快
+    if math.abs(scrollState.scrollOffset - scrollState.targetScrollOffset) > 0.5 then
         scrollState.scrollOffset += (scrollState.targetScrollOffset - scrollState.scrollOffset) / scrollState.scrollSpeed
     else
         scrollState.scrollOffset = scrollState.targetScrollOffset
@@ -203,25 +201,77 @@ end
 
 local function scrollText(delta)
     -- 更新目标滚动位置
-    scrollState.targetScrollOffset += delta * scrollState.lineHeight
+    local newOffset = scrollState.targetScrollOffset + (delta * scrollState.lineHeight)
     
     -- 限制滚动范围
-    if scrollState.targetScrollOffset < 0 then
-        scrollState.targetScrollOffset = 0
-    elseif scrollState.targetScrollOffset > scrollState.maxScrollOffset then
-        scrollState.targetScrollOffset = scrollState.maxScrollOffset
+    if newOffset < 0 then
+        newOffset = 0
+    elseif newOffset > scrollState.maxScrollOffset then
+        newOffset = scrollState.maxScrollOffset
+    end
+    
+    -- 只有在边界内才更新目标位置
+    if newOffset ~= scrollState.targetScrollOffset then
+        scrollState.targetScrollOffset = newOffset
+        print("滚动到: " .. math.floor(newOffset) .. "/" .. math.floor(scrollState.maxScrollOffset))
     end
 end
 
 -- ===== 文本控制接口 =====
 function textController.scrollUp()
     calculateContentDimensions()  -- 确保尺寸是最新的
+    local oldOffset = scrollState.targetScrollOffset
     scrollText(-1)  -- 向上滚动一行
+    
+    -- 检查是否真的滚动了
+    if scrollState.targetScrollOffset == oldOffset then
+        print("已到达顶部")
+    else
+        print("向上滚动一行")
+    end
 end
 
 function textController.scrollDown()
     calculateContentDimensions()  -- 确保尺寸是最新的
+    local oldOffset = scrollState.targetScrollOffset
     scrollText(1)   -- 向下滚动一行
+    
+    -- 检查是否真的滚动了
+    if scrollState.targetScrollOffset == oldOffset then
+        print("已到达底部")
+    else
+        print("向下滚动一行")
+    end
+end
+
+-- 立即滚动（无动画）
+function textController.scrollUpImmediate()
+    calculateContentDimensions()
+    scrollText(-1)
+    scrollState.scrollOffset = scrollState.targetScrollOffset  -- 立即跳转
+    print("立即向上滚动")
+end
+
+function textController.scrollDownImmediate()
+    calculateContentDimensions()
+    scrollText(1)
+    scrollState.scrollOffset = scrollState.targetScrollOffset  -- 立即跳转
+    print("立即向下滚动")
+end
+
+-- 滚动到顶部
+function textController.scrollToTop()
+    scrollState.targetScrollOffset = 0
+    scrollState.scrollOffset = 0  -- 立即跳转
+    print("跳转到顶部")
+end
+
+-- 滚动到底部
+function textController.scrollToBottom()
+    calculateContentDimensions()
+    scrollState.targetScrollOffset = scrollState.maxScrollOffset
+    scrollState.scrollOffset = scrollState.maxScrollOffset  -- 立即跳转
+    print("跳转到底部")
 end
 
 function textController.setContent(title, content)
