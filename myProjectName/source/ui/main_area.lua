@@ -59,12 +59,13 @@ function mainArea.draw(state, textController)
     local isPanelVisible = (state.isPanelVisible and state.isPanelVisible()) or false
     
     if isSkillVisible then
-        -- 技能面板显示时，裁剪区域从技能面板底部开始
+        -- 技能面板显示时，裁剪区域从技能面板底部开始（推动效果）
         clipY = state.screenOffset
         clipHeight = 240 - state.screenOffset
     elseif isAttributeVisible then
-        -- 属性面板显示时，裁剪区域高度减少
-        clipHeight = 240 + state.screenOffset  -- screenOffset为负值
+        -- 属性面板显示时，保持原有裁剪区域（覆盖效果，不推动主页）
+        clipY = 0
+        clipHeight = 240
     end
     
     gfx.setClipRect(0, clipY, 400, clipHeight)
@@ -101,11 +102,8 @@ function mainArea.draw(state, textController)
     if isSkillVisible then
         -- 技能面板模式：可用高度 = 裁剪区域底部 - 文本区域开始位置 - 底部预留
         textAreaHeight = (clipY + clipHeight) - textAreaStartY - 10
-    elseif isAttributeVisible then
-        -- 属性面板模式：可用高度 = 裁剪区域底部 - 文本区域开始位置 - 底部预留
-        textAreaHeight = clipHeight - (textAreaStartY - windowOffsetY) - 10
     else
-        -- 正常模式：可用高度 = 屏幕底部 - 文本区域开始位置 - 底部预留
+        -- 正常模式和属性面板模式：属性面板是覆盖效果，不影响主页文本区域
         textAreaHeight = 240 - textAreaStartY - 10
     end
     
