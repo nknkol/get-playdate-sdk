@@ -1,47 +1,52 @@
--- source/data/game_state.lua
+-- data/game_state.lua - 游戏状态管理中心
+
+-- ===== 核心状态数据区域 =====
 local state = {
+    -- --- 界面模式控制 ---
     currentMode   = "main_sentence",
     selectedIndex = 1,
+    
+    -- --- 面板显示状态 ---
     showStatus    = true,
     showAttribute = false,
-    showSkill     = false,  -- 技能面板显示状态
+    showSkill     = false,
     
-    -- 屏幕滑动相关
+    -- --- 屏幕动画参数 ---
     screenOffset = 0,           -- 当前屏幕Y偏移量（负值=上移，正值=下移）
     targetOffset = 0,           -- 目标偏移量
     attributePanelHeight = 70,  -- 属性面板高度（底部）
     skillPanelHeight = 80,      -- 技能面板高度（顶部）
     animationSpeed = 8,         -- 动画速度
     
-    -- 长按检测
+    -- --- 按键长按检测 ---
     downButtonHoldTime = 0,     -- 下键按住时间
     upButtonHoldTime = 0,       -- 上键按住时间
-    bButtonHoldTime = 0,        -- B键按住时间（新增）
+    bButtonHoldTime = 0,        -- B键按住时间
     longPressThreshold = 30,    -- 长按阈值（帧数，约0.5秒）
     
-    -- 菜单层级管理（新增）
+    -- --- 菜单层级管理 ---
     menuStack = {},             -- 菜单堆栈，存储菜单历史
     currentMenuId = "main",     -- 当前菜单ID
     currentMenuData = nil,      -- 当前菜单数据
 }
 
--- 菜单管理函数（新增）
+-- ===== 菜单堆栈管理区域 =====
+
+-- --- 菜单入栈（进入子菜单）---
 function state.pushMenu(menuId, menuData, selectedIndex)
-    -- 将当前菜单状态压入堆栈
     table.insert(state.menuStack, {
         id = state.currentMenuId,
         data = state.currentMenuData,
         selectedIndex = state.selectedIndex
     })
     
-    -- 切换到新菜单
     state.currentMenuId = menuId
     state.currentMenuData = menuData
     state.selectedIndex = selectedIndex or 1
 end
 
+-- --- 菜单出栈（返回上级菜单）---
 function state.popMenu()
-    -- 从堆栈中弹出上一个菜单
     if #state.menuStack > 0 then
         local prevMenu = table.remove(state.menuStack)
         state.currentMenuId = prevMenu.id
@@ -49,28 +54,29 @@ function state.popMenu()
         state.selectedIndex = prevMenu.selectedIndex
         return true
     end
-    return false  -- 已经是根菜单
+    return false
 end
 
+-- --- 清空菜单栈（回到根菜单）---
 function state.clearMenuStack()
-    -- 清空菜单堆栈，回到根菜单
     state.menuStack = {}
     state.currentMenuId = "main"
     state.currentMenuData = nil
     state.selectedIndex = 1
 end
 
+-- --- 菜单状态查询 ---
 function state.isInSubMenu()
-    -- 检查是否在子菜单中
     return #state.menuStack > 0
 end
 
 function state.getMenuDepth()
-    -- 获取当前菜单深度
     return #state.menuStack
 end
 
--- 工具函数
+-- ===== 面板状态工具函数区域 =====
+
+-- --- 面板可见性检测 ---
 function state.isAttributeVisible()
     return state.targetOffset < 0  -- 负偏移表示属性面板可见
 end
@@ -83,6 +89,9 @@ function state.isPanelVisible()
     return state.isAttributeVisible() or state.isSkillVisible()
 end
 
+-- ===== 面板控制操作区域 =====
+
+-- --- 属性面板控制 ---
 function state.showAttributePanel()
     state.targetOffset = -state.attributePanelHeight  -- 向上移动（负值）
     state.showAttribute = true
@@ -96,6 +105,7 @@ function state.hideAttributePanel()
     end
 end
 
+-- --- 技能面板控制 ---
 function state.showSkillPanel()
     state.targetOffset = state.skillPanelHeight  -- 向下移动（正值）
     state.showSkill = true
@@ -109,14 +119,16 @@ function state.hideSkillPanel()
     end
 end
 
+-- --- 全部面板关闭 ---
 function state.hideAllPanels()
     state.targetOffset = 0
     state.showAttribute = false
     state.showSkill = false
 end
 
+-- ===== 动画更新区域 =====
 function state.updateAnimation()
-    -- 平滑动画更新
+    -- 平滑动画插值计算
     if math.abs(state.screenOffset - state.targetOffset) > 1 then
         state.screenOffset += (state.targetOffset - state.screenOffset) / state.animationSpeed
     else

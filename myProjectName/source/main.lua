@@ -1,60 +1,64 @@
--- main.lua
+-- main.lua - 主入口文件
+
+-- ===== 核心库导入区域 =====
 import "CoreLibs/graphics"
 import "CoreLibs/timer"
 local gfx <const> = playdate.graphics
 
--- 全局状态和管理器
+-- ===== 全局状态和管理器初始化区域 =====
 LangMgr = import "lang"
 GameState = import "data/game_state"
 local controller = import "controllers/controller"
+
+-- ===== UI组件导入区域 =====
 local mainArea = import "ui/main_area"
 local statusPanel = import "ui/status_panel"
 local attributePanel = import "ui/attribute_panel"
-local skillPanel = import "ui/skill_panel"  -- 新增技能面板
+local skillPanel = import "ui/skill_panel"
 
--- 设置自定义字体
+-- ===== 字体设置区域 =====
 local CustomFont = gfx.font.new("fonts/Pixel32v1.9-12px-zh_hans")
 gfx.setFont(CustomFont)
 
+-- ===== 主游戏循环区域 =====
 function playdate.update()
-    -- 更新控制器
+    -- --- 控制器更新区 ---
     controller.update()
     
-    -- 更新动画
+    -- --- 动画更新区 ---
     GameState.updateAnimation()
     
-    -- 清空屏幕
+    -- --- 屏幕绘制区 ---
     gfx.clear()
     
-    -- 绘制技能面板（最先绘制，在顶部）
+    -- 技能面板（顶层）
     if GameState.showSkill then
         skillPanel.draw(GameState)
     end
     
-    -- 绘制主界面区域
+    -- 主界面区域（中层）
     mainArea.draw(GameState)
     
-    -- 绘制状态面板（如果需要）
+    -- 状态面板（中层）
     if GameState.showStatus then
         statusPanel.draw(GameState)
     end
     
-    -- 绘制属性面板（最后绘制，在底部）
+    -- 属性面板（底层）
     if GameState.showAttribute then
         attributePanel.draw(GameState)
     end
     
-    -- 更新计时器
+    -- --- 定时器更新区 ---
     playdate.timer.updateTimers()
     
-    -- -- 调试信息（发布时可删除）
+    -- ===== 调试信息区域（开发用）=====
     -- if playdate.isDebugBuild then
     --     gfx.setColor(gfx.kColorBlack)
     --     gfx.drawText("Offset: " .. math.floor(GameState.screenOffset), 300, 5)
     --     gfx.drawText("Down: " .. GameState.downButtonHoldTime, 300, 20)
     --     gfx.drawText("Up: " .. GameState.upButtonHoldTime, 300, 35)
-        
-    --     -- 面板状态指示
+    --     
     --     if GameState.isSkillVisible() then
     --         gfx.drawText("Skill Panel", 300, 50)
     --     elseif GameState.isAttributeVisible() then

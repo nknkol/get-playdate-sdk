@@ -1,5 +1,9 @@
--- lang/en.lua (增强版 - 支持多层菜单)
+-- =====================================================
+-- lang/en.lua - 英文语言包
+-- =====================================================
+
 return {
+    -- ===== 界面文本区域 =====
     ui = { 
         title = "Dungeon Demo", 
         prompt = "Choose action:",
@@ -8,9 +12,11 @@ return {
         backHint = "Press B to back",
         levelHint = "Level"
     },
+    
+    -- ===== 主菜单区域 =====
     menu = { "Attack", "Taunt", "Flee" },
     
-    -- 子菜单定义
+    -- ===== 子菜单定义区域 =====
     subMenus = {
         attack_target = {
             title = "Select target:",
@@ -26,6 +32,7 @@ return {
         }
     },
     
+    -- ===== 技能信息区域 =====
     skills = {
         ["Attack"] = {
             desc = "Deal physical damage to enemy",
@@ -44,7 +51,7 @@ return {
         }
     },
     
-    -- 操作提示文本
+    -- ===== 操作提示区域 =====
     hints = {
         mainMenu = "A to confirm | Hold ↑↓ for panels",
         subMenu = "A to confirm | Press B to back",
