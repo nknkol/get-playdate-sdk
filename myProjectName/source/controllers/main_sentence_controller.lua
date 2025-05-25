@@ -154,8 +154,8 @@ function mainController.update()
                     gameState.popMenu()
                     print("返回上一级菜单")
                 else
-                    gameState.currentMode = "panel_switch"
-                    print("进入面板切换模式")
+                    -- gameState.currentMode = "panel_switch"
+                    -- print("进入面板切换模式")
                 end
             end
             gameState.bButtonHoldTime = 0

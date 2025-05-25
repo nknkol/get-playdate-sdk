@@ -219,11 +219,11 @@ function mainArea.draw(state, textController)
     local attributePanelHeight = state.attributePanelHeight or 70
     
     if isSkillVisible and state.screenOffset >= skillPanelHeight * 0.9 then
-        gfx.setColor(gfx.kColorBlack)
-        gfx.drawText("↑/↓ 切换技能 - 长按B键关闭", 10, 100 + offsetY)
+        -- gfx.setColor(gfx.kColorBlack)
+        -- gfx.drawText("↑/↓ 切换技能 - 长按B键关闭", 10, 100 + offsetY)
     elseif isAttributeVisible and math.abs(state.screenOffset) >= attributePanelHeight * 0.9 then
-        gfx.setColor(gfx.kColorBlack)
-        gfx.drawText("↑/↓ 切换选项 - 长按B键关闭", 10, 150 + offsetY)
+        -- gfx.setColor(gfx.kColorBlack)
+        -- gfx.drawText("↑/↓ 切换选项 - 长按B键关闭", 10, 150 + offsetY)
     end
     
     -- ===== 清理区域 =====

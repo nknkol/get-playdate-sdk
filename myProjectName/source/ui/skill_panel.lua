@@ -50,9 +50,9 @@ function skillPanel.draw(state)
         local textY = panelY + 8
         local l = LangMgr.get()
         
-        -- --- 面板标题 ---
-        gfx.drawText(l.ui.skillPanel or "⚡ 技能说明", 10, textY)
-        gfx.drawText(l.ui.closeHint or "长按 B 键关闭", 250, textY)
+        -- -- --- 面板标题 ---
+        -- gfx.drawText(l.ui.skillPanel or "⚡ 技能说明", 10, textY)
+        -- gfx.drawText(l.ui.closeHint or "长按 B 键关闭", 250, textY)
         
         -- ===== 根据菜单类型显示内容区域 =====
         local currentMenu = getCurrentMenu()

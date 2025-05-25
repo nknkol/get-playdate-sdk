@@ -127,9 +127,9 @@ function textController.update()
                 local isPanelVisible = gameState.isPanelVisible and gameState.isPanelVisible()
                 if isPanelVisible then
                     print("有面板显示时短按B键无效果，请长按关闭面板")
-                else
-                    gameState.currentMode = "panel_switch"
-                    print("切换到面板切换模式")
+                -- else
+                --     -- gameState.currentMode = "panel_switch"
+                --     -- -- print("切换到面板切换模式")
                 end
             end
             gameState.bButtonHoldTime = 0

@@ -38,10 +38,10 @@ function controller.update()
             mainSentence.update()
         end
     elseif currentMode == "panel_switch" then
-        -- 面板切换模式
-        if panelSwitch and panelSwitch.update then
-            panelSwitch.update()
-        end
+        -- -- 面板切换模式
+        -- if panelSwitch and panelSwitch.update then
+        --     panelSwitch.update()
+        -- end
     end
 end
 
@@ -62,13 +62,13 @@ function controller.switchToMenuMode()
     end
 end
 
-function controller.switchToPanelMode()
-    local gameState = getGameState()
-    if gameState then
-        gameState.currentMode = "panel_switch"
-        print("切换到面板切换模式")
-    end
-end
+-- function controller.switchToPanelMode()
+--     local gameState = getGameState()
+--     if gameState then
+--         gameState.currentMode = "panel_switch"
+--         print("切换到面板切换模式")
+--     end
+-- end
 
 function controller.getCurrentMode()
     local gameState = getGameState()

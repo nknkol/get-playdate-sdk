@@ -213,12 +213,12 @@ function playdate.update()
         end
         
     elseif currentMode == "panel_switch" then
-        -- 面板切换模式：显示简单的切换界面
-        gfx.setColor(gfx.kColorBlack)
-        gfx.drawText("面板切换模式", 10, 50)
-        gfx.drawText("↑ 键：状态面板", 10, 80)
-        gfx.drawText("↓ 键：属性面板", 10, 100)
-        gfx.drawText("B 键：返回文本模式", 10, 120)
+        -- -- 面板切换模式：显示简单的切换界面
+        -- gfx.setColor(gfx.kColorBlack)
+        -- gfx.drawText("面板切换模式", 10, 50)
+        -- gfx.drawText("↑ 键：状态面板", 10, 80)
+        -- gfx.drawText("↓ 键：属性面板", 10, 100)
+        -- gfx.drawText("B 键：返回文本模式", 10, 120)
         
         -- 状态面板
         if GameState.showStatus and statusPanel then
