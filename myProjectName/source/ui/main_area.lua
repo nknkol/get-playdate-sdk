@@ -1,53 +1,69 @@
--- ui/main_area.lua - 主界面绘制区域
+-- ui/main_area.lua - 主界面文本显示区域（支持滚动）
 
 -- ===== 依赖导入区域 =====
 local gfx <const> = playdate.graphics
-local langMgr = LangMgr
-local L
-local function updateLang() L = langMgr.get() end
 
--- ===== 菜单数据获取区域 =====
-local function getCurrentMenu()
-    updateLang()
-    
-    if GameState.currentMenuId == "main" then
-        return L.menu  -- 主菜单
-    elseif GameState.currentMenuData then
-        return GameState.currentMenuData  -- 自定义菜单数据
-    else
-        return L.menu  -- 默认返回主菜单
-    end
+-- 安全获取全局变量的函数
+local function getLangMgr()
+    return _G.LangMgr or LangMgr
 end
 
--- --- 菜单标题获取 ---
-local function getMenuTitle()
-    if GameState.currentMenuId == "main" then
-        return L.ui.prompt
-    elseif GameState.currentMenuId == "attack_target" then
-        return "选择攻击目标："
-    elseif GameState.currentMenuId == "flee_confirm" then
-        return "确认要撤退吗？"
+local function getGameState()
+    return _G.GameState or GameState
+end
+
+local L
+local function updateLang() 
+    local langMgr = getLangMgr()
+    if langMgr then
+        L = langMgr.get() 
     else
-        return "请选择："
+        L = { ui = { title = "Text Display" } }  -- 默认值
     end
 end
 
 -- ===== 主绘制函数区域 =====
 local mainArea = {}
-function mainArea.draw(state)
+
+function mainArea.draw(state, textController)
+    -- 安全检查参数
+    if not state then
+        gfx.setColor(gfx.kColorBlack)
+        gfx.drawText("Error: No state provided", 10, 10)
+        return
+    end
+    
     updateLang()
     
+    -- 从textController获取文本内容和滚动状态
+    local textContent = textController and textController.getTextContent() or { title = "Text Display", content = {"No content"} }
+    local scrollState = textController and textController.getScrollState() or { 
+        scrollOffset = 0, 
+        maxScrollOffset = 0,
+        lineHeight = 16,
+        maxVisibleLines = 10,
+        totalContentHeight = 0,
+        visibleAreaHeight = 150
+    }
+    
     -- ===== 屏幕偏移计算区域 =====
-    local offsetY = state.screenOffset  -- 正值=下移，负值=上移
+    local offsetY = state.screenOffset or 0  -- 正值=下移，负值=上移
     
     -- --- 裁剪区域设置 ---
     local clipY = 0
     local clipHeight = 240
+    local contentStartY = 45  -- 内容开始Y位置
     
-    if state.isSkillVisible() then
+    -- 安全检查 state 方法
+    local isSkillVisible = (state.isSkillVisible and state.isSkillVisible()) or false
+    local isAttributeVisible = (state.isAttributeVisible and state.isAttributeVisible()) or false
+    local isPanelVisible = (state.isPanelVisible and state.isPanelVisible()) or false
+    
+    if isSkillVisible then
         clipY = state.screenOffset
         clipHeight = 240 - state.screenOffset
-    elseif state.isAttributeVisible() then
+        contentStartY = 45 + state.screenOffset
+    elseif isAttributeVisible then
         clipHeight = 240 + state.screenOffset  -- screenOffset为负值
     end
     
@@ -55,63 +71,98 @@ function mainArea.draw(state)
     
     -- ===== 标题和导航区域 =====
     gfx.setColor(gfx.kColorBlack)
-    gfx.drawText(L.ui.title, 10, 5 + offsetY)
+    gfx.drawText(textContent.title, 10, 5 + offsetY)
     
     -- --- 分割线 ---
     local separatorY = 20 + offsetY
     gfx.drawLine(10, separatorY, 390, separatorY)
     
-    -- --- 菜单标题 ---
-    local menuTitle = getMenuTitle()
-    gfx.drawText(menuTitle, 10, 25 + offsetY)
-    
-    -- --- 菜单层级提示 ---
-    if state.isInSubMenu() then
-        local depthInfo = "层级: " .. (state.getMenuDepth() + 1) .. " | 短按B键返回"
-        gfx.drawText(depthInfo, 10, 40 + offsetY)
-    end
-
-    -- ===== 当前选项显示区域 =====
-    local currentMenu = getCurrentMenu()
-    if currentMenu and currentMenu[state.selectedIndex] then
-        local selectedOptionText = currentMenu[state.selectedIndex]
-        local y = state.isInSubMenu() and 65 + offsetY or 50 + offsetY
-        
-        -- --- 高亮背景绘制 ---
-        local w, h = gfx.getTextSize(selectedOptionText)
-        gfx.setColor(gfx.kColorBlack)
-        gfx.fillRect(8, y - 2, w + 4, h)
-        
-        -- --- 反色文字绘制 ---
-        gfx.setImageDrawMode(gfx.kDrawModeInverted)
-        gfx.drawText(selectedOptionText, 10, y)
-        gfx.setImageDrawMode(gfx.kDrawModeCopy)
-    else
-        -- --- 错误处理 ---
-        gfx.setColor(gfx.kColorBlack)
-        gfx.drawText("错误: 无法加载菜单", 10, 50 + offsetY)
+    -- --- 滚动指示器 ---
+    if scrollState.maxScrollOffset > 0 then
+        local scrollPercent = scrollState.scrollOffset / scrollState.maxScrollOffset
+        local indicatorText = string.format("滚动: %d%%", math.floor(scrollPercent * 100))
+        gfx.drawText(indicatorText, 300, 5 + offsetY)
     end
     
-    -- ===== 操作提示区域 =====
-    if not state.isPanelVisible() then
-        local hintY = 180 + offsetY
-        gfx.setColor(gfx.kColorBlack)
-        
-        -- --- 根据菜单状态显示不同提示 ---
-        if state.isInSubMenu() then
-            gfx.drawText("A键确认 | 短按B键返回", 10, hintY)
-            gfx.drawText("长按 ↑ 键查看技能", 10, hintY + 15)
-        else
-            gfx.drawText("长按 ↑ 键查看技能", 10, hintY)
-            gfx.drawText("长按 ↓ 键查看属性", 10, hintY + 15)
+    -- ===== 文本内容显示区域 =====
+    local textAreaY = contentStartY
+    local textAreaHeight = clipHeight - contentStartY - 40  -- 预留底部空间
+    
+    -- --- 文本内容绘制 ---
+    gfx.setColor(gfx.kColorBlack)
+    
+    -- 计算第一个可见行的索引
+    local firstVisibleLine = math.floor(scrollState.scrollOffset / scrollState.lineHeight) + 1
+    local lastVisibleLine = math.min(firstVisibleLine + scrollState.maxVisibleLines + 1, #textContent.content)
+    
+    -- 绘制可见的文本行
+    for i = firstVisibleLine, lastVisibleLine do
+        local line = textContent.content[i]
+        if line then
+            local lineY = textAreaY + (i - 1) * scrollState.lineHeight - scrollState.scrollOffset
+            
+            -- 只绘制在可见区域内的行
+            if lineY >= textAreaY - scrollState.lineHeight and lineY <= textAreaY + textAreaHeight then
+                if line == "" then
+                    -- 空行不绘制任何内容
+                elseif string.sub(line, 1, 3) == "---" then
+                    -- 分割线
+                    gfx.drawLine(10, lineY + 8, 390, lineY + 8)
+                elseif string.sub(line, 1, 1) == "•" then
+                    -- 列表项，稍微缩进
+                    gfx.drawText(line, 20, lineY)
+                else
+                    -- 普通文本
+                    gfx.drawText(line, 10, lineY)
+                end
+            end
         end
     end
     
+    -- ===== 滚动条绘制区域 =====
+    if scrollState.maxScrollOffset > 0 then
+        local scrollBarX = 390
+        local scrollBarY = textAreaY
+        local scrollBarHeight = textAreaHeight
+        local scrollBarWidth = 3
+        
+        -- 滚动条背景
+        gfx.setColor(gfx.kColorWhite)
+        gfx.fillRect(scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight)
+        gfx.setColor(gfx.kColorBlack)
+        gfx.drawRect(scrollBarX, scrollBarY, scrollBarWidth, scrollBarHeight)
+        
+        -- 滚动条滑块
+        local sliderHeight = math.max(10, scrollBarHeight * (scrollState.visibleAreaHeight / scrollState.totalContentHeight))
+        local sliderY = scrollBarY + (scrollState.scrollOffset / scrollState.maxScrollOffset) * (scrollBarHeight - sliderHeight)
+        
+        gfx.setColor(gfx.kColorBlack)
+        gfx.fillRect(scrollBarX, sliderY, scrollBarWidth, sliderHeight)
+    end
+    
+    -- ===== 操作提示区域 =====
+    if not isPanelVisible then
+        local hintY = 200 + offsetY
+        gfx.setColor(gfx.kColorBlack)
+        
+        -- --- 滚动和面板操作提示 ---
+        if scrollState.maxScrollOffset > 0 then
+            gfx.drawText("↑↓ 滚动文本 | 长按 ↑ 技能 | 长按 ↓ 属性", 10, hintY)
+        else
+            gfx.drawText("长按 ↑ 技能 | 长按 ↓ 属性 | B键切换模式", 10, hintY)
+        end
+        gfx.drawText("短按 B 键切换模式", 10, hintY + 15)
+    end
+    
     -- ===== 长按进度指示器区域 =====
+    local upButtonHoldTime = state.upButtonHoldTime or 0
+    local downButtonHoldTime = state.downButtonHoldTime or 0
+    local bButtonHoldTime = state.bButtonHoldTime or 0
+    local longPressThreshold = state.longPressThreshold or 30
     
     -- --- 上键进度条（技能面板）---
-    if state.upButtonHoldTime > state.longPressThreshold / 3 and not state.isPanelVisible() then
-        local progress = state.upButtonHoldTime / state.longPressThreshold
+    if upButtonHoldTime > longPressThreshold / 3 and not isPanelVisible then
+        local progress = upButtonHoldTime / longPressThreshold
         if progress > 1 then progress = 1 end
         
         local barWidth = 100
@@ -131,8 +182,8 @@ function mainArea.draw(state)
     end
     
     -- --- 下键进度条（属性面板）---
-    if state.downButtonHoldTime > state.longPressThreshold / 3 and not state.isPanelVisible() then
-        local progress = state.downButtonHoldTime / state.longPressThreshold
+    if downButtonHoldTime > longPressThreshold / 3 and not isPanelVisible then
+        local progress = downButtonHoldTime / longPressThreshold
         if progress > 1 then progress = 1 end
         
         local barWidth = 100
@@ -152,8 +203,8 @@ function mainArea.draw(state)
     end
     
     -- --- B键进度条（关闭面板）---
-    if state.bButtonHoldTime > state.longPressThreshold / 3 and state.isPanelVisible() then
-        local progress = state.bButtonHoldTime / state.longPressThreshold
+    if bButtonHoldTime > longPressThreshold / 3 and isPanelVisible then
+        local progress = bButtonHoldTime / longPressThreshold
         if progress > 1 then progress = 1 end
         
         local barWidth = 100
@@ -173,16 +224,38 @@ function mainArea.draw(state)
     end
     
     -- ===== 面板状态提示区域 =====
-    if state.isSkillVisible() and state.screenOffset >= state.skillPanelHeight * 0.9 then
+    local skillPanelHeight = state.skillPanelHeight or 80
+    local attributePanelHeight = state.attributePanelHeight or 70
+    
+    if isSkillVisible and state.screenOffset >= skillPanelHeight * 0.9 then
         gfx.setColor(gfx.kColorBlack)
         gfx.drawText("↑/↓ 切换技能 - 长按B键关闭", 10, 100 + offsetY)
-    elseif state.isAttributeVisible() and math.abs(state.screenOffset) >= state.attributePanelHeight * 0.9 then
+    elseif isAttributeVisible and math.abs(state.screenOffset) >= attributePanelHeight * 0.9 then
         gfx.setColor(gfx.kColorBlack)
         gfx.drawText("↑/↓ 切换选项 - 长按B键关闭", 10, 150 + offsetY)
     end
     
     -- ===== 清理区域 =====
     gfx.clearClipRect()
+end
+
+-- ===== 兼容性接口（现在通过textController处理） =====
+function mainArea.scrollUp()
+    -- 这些函数现在由textController处理
+    print("提示：滚动功能已移至textController")
+end
+
+function mainArea.scrollDown()
+    print("提示：滚动功能已移至textController")
+end
+
+function mainArea.setContent(title, content)
+    print("提示：内容设置功能已移至textController")
+end
+
+function mainArea.getScrollState()
+    print("提示：滚动状态获取功能已移至textController")
+    return { canScrollUp = false, canScrollDown = false, scrollPercent = 0 }
 end
 
 return mainArea
