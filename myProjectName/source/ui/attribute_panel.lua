@@ -37,16 +37,16 @@ function attributePanel.draw(state)
         local textY = panelY + 8
         
         -- --- 第一行属性 ---
-        gfx.drawText("⚔️ 攻击力: 15", 10, textY)
-        gfx.drawText("🛡️ 防御力: 8", 150, textY)
+        gfx.drawText("攻击力: 15", 10, textY)
+        gfx.drawText("防御力: 8", 150, textY)
         
         -- --- 第二行属性 ---
-        gfx.drawText("❤️ 生命值: 100/120", 10, textY + 16)
-        gfx.drawText("⚡ 魔法值: 50/60", 150, textY + 16)
+        gfx.drawText("生命值: 100/120", 10, textY + 16)
+        gfx.drawText("魔法值: 50/60", 150, textY + 16)
         
         -- --- 第三行属性 ---
-        gfx.drawText("💰 金币: 250", 10, textY + 32)
-        gfx.drawText("📈 等级: 5", 150, textY + 32)
+        gfx.drawText("金币: 250", 10, textY + 32)
+        gfx.drawText("等级: 5", 150, textY + 32)
         
         -- --- 操作提示 ---
         gfx.drawText("按 B 键关闭", 280, textY)
