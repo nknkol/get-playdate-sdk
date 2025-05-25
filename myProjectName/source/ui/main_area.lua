@@ -91,7 +91,7 @@ function mainArea.draw(state, textController)
     
     -- ===== 文本内容显示区域 =====
     local textAreaY = contentStartY
-    local textAreaHeight = clipHeight - contentStartY - 40  -- 预留底部空间
+    local textAreaHeight = clipHeight - contentStartY - 10  -- 减少底部预留空间（原来是40）
     
     -- --- 文本内容绘制 ---
     gfx.setColor(gfx.kColorBlack)
@@ -143,20 +143,6 @@ function mainArea.draw(state, textController)
         
         gfx.setColor(gfx.kColorBlack)
         gfx.fillRect(scrollBarX, sliderY, scrollBarWidth, sliderHeight)
-    end
-    
-    -- ===== 操作提示区域 =====
-    if not isPanelVisible then
-        local hintY = 200 + offsetY
-        gfx.setColor(gfx.kColorBlack)
-        
-        -- --- 滚动和面板操作提示 ---
-        if scrollState.maxScrollOffset > 0 then
-            gfx.drawText("↑↓ 滚动文本 | A键 快速跳转 | 长按↑↓ 面板", 10, hintY)
-        else
-            gfx.drawText("长按 ↑ 技能 | 长按 ↓ 属性 | B键切换模式", 10, hintY)
-        end
-        gfx.drawText("短按 B 键切换模式 | 摇杆精细滚动", 10, hintY + 15)
     end
     
     -- ===== 长按进度指示器区域 =====
